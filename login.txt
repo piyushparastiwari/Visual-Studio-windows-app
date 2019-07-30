@@ -1,0 +1,115 @@
+Mainpage.xaml
+<Grid>
+        
+        <Grid.Background>
+            <ImageBrush ImageSource="png\B4.png"/>
+        </Grid.Background>
+        <Grid VerticalAlignment="Top" Margin="8,12,8,-152" Padding="16" Background="Transparent" Height="500">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <Ellipse Grid.Row="2" Height="100" Width="100" Margin="8" HorizontalAlignment="Center">
+                <Ellipse.Fill>
+                    <ImageBrush ImageSource="png\L2.png" />
+                </Ellipse.Fill>
+            </Ellipse>
+
+
+            <TextBox x:Name="txt1" Grid.Row="3" Margin="8" PlaceholderText="Enter Username" HorizontalAlignment="Center" Width="200"></TextBox>
+            <PasswordBox x:Name="txt2" Grid.Row="4" Margin="8" PlaceholderText="Enter Password" Width="200" HorizontalAlignment="Center"></PasswordBox>
+            <Grid Grid.Row="5" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+
+                </Grid.ColumnDefinitions>
+                <Button x:Name="login" Background="#1bc3cb" Content="Login" Width="90" Grid.Column="0" Margin="8" HorizontalAlignment="Stretch" Click="btn_Click"></Button>
+                <Button x:Name="signup" Background="LightCoral" Content="SignUp" Width="90" Grid.Column="1" Margin="8" HorizontalAlignment="Stretch" Click="signup_Click"></Button>
+            </Grid>
+            
+        </Grid>
+    </Grid>
+
+
+Mainpage.xaml.cs
+
+public sealed partial class MainPage : Page
+    {
+        string path;
+        SQLite.Net.SQLiteConnection conn;
+        public MainPage()
+        {
+            this.InitializeComponent();
+            path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "db.sqlite");
+            conn = new SQLite.Net.SQLiteConnection(new SQLite.Net.Platform.WinRT.SQLitePlatformWinRT(), path);
+            conn.CreateTable<User>();
+        }
+
+        public bool lLogin(string user, string password)
+        {
+            var query = conn.Table<User>().
+                Where(t => t.us == user && t.pwd == password);
+            if (query.Count() > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool check(string user,string iden)
+        {
+            var query = conn.Table<User>().Where(s => s.us == user && s.identity == iden);
+            if(query.Count()>0)
+            {
+                return true;
+                
+            }
+            else
+            {
+                return false;
+                
+            }
+        }
+
+        private async void btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (txt1.Text == "" || txt2.Password == "")
+            {
+                var message = new MessageDialog("All fields must be filled");
+                await message.ShowAsync();
+            }
+            else
+            {
+                if (lLogin(txt1.Text, txt2.Password))
+                {
+                    if (check(txt1.Text,"Customer"))
+                    {
+                        Frame.Navigate(typeof(Customer));
+                    }
+                    else
+                    {
+                        Frame.Navigate(typeof(Shopowner));
+                    }
+                    
+                    
+                }
+                else
+                {
+                    
+                    
+                    var message = new MessageDialog("Login failed");
+                    await message.ShowAsync();
+                }
+            }
+        }

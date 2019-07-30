@@ -1,0 +1,95 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Windows.UI.Popups;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Navigation;
+
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+
+namespace QUIZZ
+{
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class signuppage : Page
+    {
+        string path;
+        SQLite.Net.SQLiteConnection conn;
+        public signuppage()
+        {
+            this.InitializeComponent();
+            this.InitializeComponent();
+            path = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "db.sqlite");
+            conn = new SQLite.Net.SQLiteConnection(new SQLite.Net.Platform.WinRT.SQLitePlatformWinRT(), path);
+            conn.CreateTable<Signup>();
+        }
+        
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            bool x = true;
+            var query = conn.Table<Signup>();
+            foreach(var message in query)
+            {
+                if(username.Text==message.Username)
+                {
+                    var dialog = new MessageDialog("this Username already exists");
+                    await dialog.ShowAsync();
+                    x = false;
+                    break;
+                }
+                if (phone.Text == message.Phone)
+                {
+                    var dialog = new MessageDialog("this phone no. already exists");
+                    await dialog.ShowAsync();
+                    x = false;
+                    break;
+                }
+                if (email.Text == message.Email)
+                {
+                    var dialog = new MessageDialog("this email already exists");
+                    await dialog.ShowAsync();
+                    x = false;
+                    break;
+                }
+            }
+            if (x == true)
+            {
+                var s = conn.Insert(new Signup()
+                {
+                    Name = name.Text,
+                    Email = email.Text,
+                    Phone = phone.Text,
+                    Username = username.Text,
+                    Password = pass.Password
+                });
+                
+                    var dialog = new MessageDialog("Signup Successfull");
+                    await dialog.ShowAsync();
+            }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(MainPage));
+        }
+    }
+
+    public class Signup
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+}
