@@ -1,0 +1,3 @@
+go to extention option and redownload the sqlite for uwp 
+change the debug to release and CPU to x86 in upper corner and 
+then run.
